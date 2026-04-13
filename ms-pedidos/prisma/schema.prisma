@@ -1,0 +1,110 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Pedido {
+  id                   String         @id @default(uuid())
+  clienteId            String         @map("cliente_id")
+  restauranteId        String         @map("restaurante_id")
+  entregadorId         String?        @map("entregador_id")
+  pagamentoId          String?        @map("pagamento_id")
+  status               StatusPedido   @default(AGUARDANDO_CONFIRMACAO)
+  enderecoRua          String         @map("endereco_rua")
+  enderecoNumero       String         @map("endereco_numero")
+  enderecoComplemento  String?        @map("endereco_complemento")
+  enderecoBairro       String         @map("endereco_bairro")
+  enderecoCidade       String         @map("endereco_cidade")
+  enderecoEstado       String         @map("endereco_estado")
+  enderecoCep          String         @map("endereco_cep")
+  enderecoLatitude     Decimal?       @map("endereco_latitude")
+  enderecoLongitude    Decimal?       @map("endereco_longitude")
+  formaPagamento       FormaPagamento @map("forma_pagamento")
+  subtotal             Int            @default(0)
+  taxaEntrega          Int            @default(0) @map("taxa_entrega")
+  desconto             Int            @default(0)
+  total                Int            @default(0)
+  observacoes          String?        @db.Text
+  criadoEm             DateTime       @default(now()) @map("criado_em")
+  atualizadoEm         DateTime       @updatedAt @map("atualizado_em")
+
+  itens           ItemPedido[]
+  historicoStatus HistoricoStatus[]
+  avaliacao       AvaliacaoPedido?
+
+  @@index([clienteId])
+  @@index([status])
+  @@index([criadoEm])
+  @@map("pedidos")
+}
+
+model ItemPedido {
+  id             String  @id @default(uuid())
+  pedidoId       String  @map("pedido_id")
+  produtoId      String  @map("produto_id")
+  nomeProduto    String  @map("nome_produto")
+  quantidade     Int
+  precoUnitario  Int     @map("preco_unitario")
+  subtotal       Int
+  observacoes    String?
+
+  pedido Pedido @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
+
+  @@index([pedidoId])
+  @@map("itens_pedido")
+}
+
+model HistoricoStatus {
+  id              String        @id @default(uuid())
+  pedidoId        String        @map("pedido_id")
+  statusAnterior  StatusPedido? @map("status_anterior")
+  statusNovo      StatusPedido  @map("status_novo")
+  origem          OrigemStatus
+  registradoEm   DateTime      @default(now()) @map("registrado_em")
+
+  pedido Pedido @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
+
+  @@index([pedidoId])
+  @@map("historico_status")
+}
+
+model AvaliacaoPedido {
+  id          String   @id @default(uuid())
+  pedidoId    String   @unique @map("pedido_id")
+  clienteId   String   @map("cliente_id")
+  nota        Int
+  comentario  String?  @db.Text
+  criadoEm   DateTime @default(now()) @map("criado_em")
+
+  pedido Pedido @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
+
+  @@map("avaliacoes_pedido")
+}
+
+enum StatusPedido {
+  AGUARDANDO_CONFIRMACAO
+  CONFIRMADO
+  EM_PREPARO
+  EM_ENTREGA
+  ENTREGUE
+  CANCELADO
+}
+
+enum FormaPagamento {
+  CARTAO_CREDITO
+  CARTAO_DEBITO
+  PIX
+  DINHEIRO
+  VALE_REFEICAO
+}
+
+enum OrigemStatus {
+  CLIENTE
+  PAGAMENTOS
+  ENTREGADORES
+  SISTEMA
+}
