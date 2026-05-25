@@ -27,7 +27,6 @@ export async function buildApp(): Promise<FastifyInstance> {
     logger: process.env.NODE_ENV !== 'test',
   })
 
-  // ── Plugins ──────────────────────────────────────────────────────────────
   await app.register(fastifyCors, { origin: true })
   await app.register(fastifyHelmet)
 
@@ -35,7 +34,6 @@ export async function buildApp(): Promise<FastifyInstance> {
     secret: process.env.JWT_SECRET!,
   })
 
-  // ── Swagger ───────────────────────────────────────────────────────────────
   await app.register(fastifySwagger, {
     openapi: {
       info: {
@@ -56,7 +54,6 @@ export async function buildApp(): Promise<FastifyInstance> {
     uiConfig: { docExpansion: 'list', deepLinking: false },
   })
 
-  // ── Injeção de dependências ────────────────────────────────────────────────
   const repository = new PrismaPedidoRepository(prisma)
 
   const controller = new PedidoController(
@@ -69,10 +66,8 @@ export async function buildApp(): Promise<FastifyInstance> {
     new AvaliarPedidoUseCase(repository),
   )
 
-  // ── Rotas ─────────────────────────────────────────────────────────────────
   await pedidoRoutes(app, controller)
 
-  // ── HealthCheck ───────────────────────────────────────────────────────────
   app.get('/health', {
     schema: { tags: ['Sistema'], summary: 'Health check do serviço' },
   }, async (_, reply) => {
@@ -94,9 +89,7 @@ export async function buildApp(): Promise<FastifyInstance> {
     }
   })
 
-  // ── Tratamento global de erros ─────────────────────────────────────────────
-  app.setErrorHandler((error, request, reply) => {
-    // Erros de domínio (AppError)
+  app.setErrorHandler((error: any, request, reply) => {
     if (error instanceof AppError) {
       return reply.status(error.statusCode).send({
         success: false,
@@ -105,20 +98,18 @@ export async function buildApp(): Promise<FastifyInstance> {
       })
     }
 
-    // Erros de validação Zod
     if (error instanceof ZodError) {
       return reply.status(400).send({
         success: false,
         code: 'VALIDATION_ERROR',
         message: 'Dados inválidos.',
-        errors: error.errors.map(e => ({
+        errors: error.errors.map((e: any) => ({
           field: e.path.join('.'),
           message: e.message,
         })),
       })
     }
 
-    // Erros de JWT
     if (error.statusCode === 401) {
       return reply.status(401).send({
         success: false,
@@ -127,7 +118,6 @@ export async function buildApp(): Promise<FastifyInstance> {
       })
     }
 
-    // Erro genérico
     app.log.error(error)
     return reply.status(500).send({
       success: false,

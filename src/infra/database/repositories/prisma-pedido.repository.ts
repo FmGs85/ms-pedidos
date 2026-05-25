@@ -8,6 +8,8 @@ import {
   Pedido,
   AvaliacaoPedido,
   HistoricoStatus,
+  StatusPedido,
+  OrigemStatus,
 } from '../../../domain/entities/pedido.entity'
 import { toDomainPedido, toFlatEndereco } from '../mappers/pedido.mapper'
 
@@ -123,9 +125,9 @@ export class PrismaPedidoRepository implements IPedidoRepository {
     return registros.map(r => ({
       id: r.id,
       pedidoId: r.pedidoId,
-      statusAnterior: r.statusAnterior ?? undefined,
-      statusNovo: r.statusNovo,
-      origem: r.origem,
+      statusAnterior: (r.statusAnterior ?? undefined) as StatusPedido | undefined,
+      statusNovo: r.statusNovo as unknown as StatusPedido,
+      origem: r.origem as unknown as OrigemStatus,
       registradoEm: r.registradoEm,
     }))
   }
@@ -165,6 +167,4 @@ export class PrismaPedidoRepository implements IPedidoRepository {
       criadoEm: avaliacao.criadoEm,
     }
   }
-
 }
-

@@ -1,4 +1,3 @@
-// Enums do domínio
 export enum StatusPedido {
   AGUARDANDO_CONFIRMACAO = 'AGUARDANDO_CONFIRMACAO',
   CONFIRMADO = 'CONFIRMADO',
@@ -23,7 +22,6 @@ export enum OrigemStatus {
   SISTEMA = 'SISTEMA',
 }
 
-// Transições de status válidas (RN05)
 const transicoesValidas: Record<StatusPedido, StatusPedido[]> = {
   [StatusPedido.AGUARDANDO_CONFIRMACAO]: [StatusPedido.CONFIRMADO, StatusPedido.CANCELADO],
   [StatusPedido.CONFIRMADO]: [StatusPedido.EM_PREPARO, StatusPedido.CANCELADO],
@@ -37,7 +35,10 @@ export function podeTransicionarPara(atual: StatusPedido, novo: StatusPedido): b
   return transicoesValidas[atual].includes(novo)
 }
 
-// Endereço (value object)
+export function statusPermitidos(atual: StatusPedido): StatusPedido[] {
+  return transicoesValidas[atual]
+}
+
 export interface Endereco {
   rua: string
   numero: string
@@ -50,19 +51,17 @@ export interface Endereco {
   longitude?: number
 }
 
-// Item do pedido
 export interface ItemPedido {
   id?: string
   pedidoId?: string
   produtoId: string
   nomeProduto: string
   quantidade: number
-  precoUnitario: number  // em centavos
-  subtotal: number       // em centavos
+  precoUnitario: number
+  subtotal: number
   observacoes?: string
 }
 
-// Pedido (entidade principal)
 export interface Pedido {
   id?: string
   clienteId: string
@@ -71,36 +70,26 @@ export interface Pedido {
   pagamentoId?: string
   status: StatusPedido
   itens: ItemPedido[]
-  enderecoRua: string
-  enderecoNumero: string
-  enderecoComplemento?: string
-  enderecoBairro: string
-  enderecoCidade: string
-  enderecoEstado: string
-  enderecoCep: string
-  enderecoLatitude?: number
-  enderecoLongitude?: number
+  endereco: Endereco
   formaPagamento: FormaPagamento
-  subtotal: number     // em centavos
-  taxaEntrega: number  // em centavos
-  desconto: number     // em centavos — fornecido por Pagamentos
-  total: number        // em centavos
+  subtotal: number
+  taxaEntrega: number
+  desconto: number
+  total: number
   observacoes?: string
   criadoEm?: Date
   atualizadoEm?: Date
 }
 
-// Avaliação
 export interface AvaliacaoPedido {
   id?: string
   pedidoId: string
   clienteId: string
-  nota: number  // 1 a 5
+  nota: number
   comentario?: string
   criadoEm?: Date
 }
 
-// Histórico de status
 export interface HistoricoStatus {
   id?: string
   pedidoId: string
@@ -110,12 +99,10 @@ export interface HistoricoStatus {
   registradoEm?: Date
 }
 
-// Helpers de cálculo (RN08)
 export function calcularSubtotalItem(quantidade: number, precoUnitario: number): number {
   return quantidade * precoUnitario
 }
 
 export function calcularTotalPedido(subtotal: number, desconto: number, taxaEntrega: number): number {
-  const total = subtotal - desconto + taxaEntrega
-  return Math.max(0, total)
+  return Math.max(0, subtotal - desconto + taxaEntrega)
 }
