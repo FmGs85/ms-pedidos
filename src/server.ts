@@ -1,3 +1,4 @@
+import 'dotenv/config'
 import { buildApp } from './infra/http/app'
 
 const PORT = Number(process.env.PORT) || 3002

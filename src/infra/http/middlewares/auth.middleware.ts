@@ -2,9 +2,9 @@ import { FastifyRequest, FastifyReply } from 'fastify'
 import { UnauthorizedError, ForbiddenError } from '../../../domain/errors/app.error'
 
 export interface JwtPayload {
-  sub: string        // clienteId
+  id: number | string  // campo gerado pelo ms-usuarios
   email: string
-  role: 'CLIENTE' | 'ADMIN'
+  role: 'USER' | 'ADMIN'
   iat: number
   exp: number
 }

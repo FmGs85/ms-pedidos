@@ -36,7 +36,7 @@ export class PedidoController {
     const body = criarPedidoSchema.parse(request.body)
 
     const pedido = await this.criarPedido.execute({
-      clienteId: user.sub,
+      clienteId: String(user.id),
       restauranteId: body.restauranteId,
       itens: body.itens,
       endereco: body.endereco,
@@ -56,7 +56,7 @@ export class PedidoController {
     const user = getAuthUser(request)
     const pedido = await this.buscarPedido.execute(
       request.params.id,
-      user.sub,
+      String(user.id),
       user.role === 'ADMIN',
     )
 
@@ -68,7 +68,7 @@ export class PedidoController {
     const user = getAuthUser(request)
     const filtros = filtrosPedidoSchema.parse(request.query)
 
-    const resultado = await this.listarPedidos.execute(user.sub, {
+    const resultado = await this.listarPedidos.execute(String(user.id), {
       status: filtros.status as StatusPedido | undefined,
       dataInicio: filtros.dataInicio ? new Date(filtros.dataInicio) : undefined,
       dataFim: filtros.dataFim ? new Date(filtros.dataFim) : undefined,
@@ -84,7 +84,7 @@ export class PedidoController {
     const user = getAuthUser(request)
     const pedido = await this.cancelarPedido.execute(
       request.params.id,
-      user.sub,
+      String(user.id),
       user.role === 'ADMIN',
     )
 
@@ -130,7 +130,7 @@ export class PedidoController {
 
     const avaliacao = await this.avaliarPedido.execute({
       pedidoId: request.params.id,
-      clienteId: user.sub,
+      clienteId: String(user.id),
       nota: body.nota,
       comentario: body.comentario,
     })
