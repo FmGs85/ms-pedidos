@@ -4,7 +4,7 @@ import { UnauthorizedError, ForbiddenError } from '../../../domain/errors/app.er
 export interface JwtPayload {
   id: number | string
   email: string
-  role: 'USUARIO' | 'RESTAURANTE' | 'ADMIN'
+  role: 'USER' | 'RESTAURANTE' | 'ADMIN'
   iat: number
   exp: number
 }
