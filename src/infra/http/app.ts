@@ -18,7 +18,14 @@ import {
 } from '../../application/use-cases/pedido/pedido.use-cases'
 import { AvaliarPedidoUseCase } from '../../application/use-cases/avaliacao/avaliar-pedido.use-case'
 import { PedidoController } from './controllers/pedido.controller'
+import { MensagemController } from './controllers/mensagem.controller'
 import { pedidoRoutes } from './routes/pedido.routes'
+import { mensagemRoutes } from './routes/mensagem.routes'
+import {
+  EnviarMensagemUseCase,
+  ListarMensagensUseCase,
+  MarcarMensagensLidasUseCase,
+} from '../../application/use-cases/mensagem/mensagem.use-cases'
 import { AppError } from '../../domain/errors/app.error'
 import { ZodError } from 'zod'
 
@@ -66,7 +73,14 @@ export async function buildApp(): Promise<FastifyInstance> {
     new AvaliarPedidoUseCase(repository),
   )
 
+  const mensagemController = new MensagemController(
+    new EnviarMensagemUseCase(repository),
+    new ListarMensagensUseCase(repository),
+    new MarcarMensagensLidasUseCase(repository),
+  )
+
   await pedidoRoutes(app, controller)
+  await mensagemRoutes(app, mensagemController)
 
   app.get('/health', {
     schema: { tags: ['Sistema'], summary: 'Health check do serviço' },

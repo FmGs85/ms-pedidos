@@ -8,6 +8,7 @@ import {
   Pedido,
   AvaliacaoPedido,
   HistoricoStatus,
+  MensagemPedido,
   StatusPedido,
   OrigemStatus,
 } from '../../../domain/entities/pedido.entity'
@@ -166,5 +167,50 @@ export class PrismaPedidoRepository implements IPedidoRepository {
       comentario: avaliacao.comentario ?? undefined,
       criadoEm: avaliacao.criadoEm,
     }
+  }
+
+  // ── Mensagens ────────────────────────────────────────────────────────────────
+
+  async criarMensagem(
+    mensagem: Omit<MensagemPedido, 'id' | 'criadoEm'>,
+  ): Promise<MensagemPedido> {
+    const criada = await this.prisma.mensagemPedido.create({
+      data: {
+        pedidoId: mensagem.pedidoId,
+        remetenteId: mensagem.remetenteId,
+        texto: mensagem.texto,
+        lida: mensagem.lida,
+      },
+    })
+    return {
+      id: criada.id,
+      pedidoId: criada.pedidoId,
+      remetenteId: criada.remetenteId,
+      texto: criada.texto,
+      lida: criada.lida,
+      criadoEm: criada.criadoEm,
+    }
+  }
+
+  async listarMensagens(pedidoId: string): Promise<MensagemPedido[]> {
+    const mensagens = await this.prisma.mensagemPedido.findMany({
+      where: { pedidoId },
+      orderBy: { criadoEm: 'asc' },
+    })
+    return mensagens.map((m) => ({
+      id: m.id,
+      pedidoId: m.pedidoId,
+      remetenteId: m.remetenteId,
+      texto: m.texto,
+      lida: m.lida,
+      criadoEm: m.criadoEm,
+    }))
+  }
+
+  async marcarMensagensLidas(pedidoId: string): Promise<void> {
+    await this.prisma.mensagemPedido.updateMany({
+      where: { pedidoId, lida: false },
+      data: { lida: true },
+    })
   }
 }

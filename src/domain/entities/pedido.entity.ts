@@ -81,6 +81,15 @@ export interface Pedido {
   atualizadoEm?: Date
 }
 
+export interface MensagemPedido {
+  id?: string
+  pedidoId: string
+  remetenteId: string
+  texto: string
+  lida: boolean
+  criadoEm?: Date
+}
+
 export interface AvaliacaoPedido {
   id?: string
   pedidoId: string

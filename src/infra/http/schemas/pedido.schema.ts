@@ -79,8 +79,14 @@ export const filtrosPedidoSchema = z.object({
   limit: z.coerce.number().int().min(1).max(50).default(10),
 })
 
+// ─── Mensagem ─────────────────────────────────────────────────────────────────
+export const enviarMensagemSchema = z.object({
+  texto: z.string().min(1, 'O texto da mensagem não pode ser vazio.').max(2000),
+})
+
 export type CriarPedidoInput = z.infer<typeof criarPedidoSchema>
 export type AtualizarStatusInput = z.infer<typeof atualizarStatusSchema>
 export type AvaliarPedidoInput = z.infer<typeof avaliarPedidoSchema>
 export type AplicarDescontoInput = z.infer<typeof aplicarDescontoSchema>
 export type FiltrosPedidoInput = z.infer<typeof filtrosPedidoSchema>
+export type EnviarMensagemInput = z.infer<typeof enviarMensagemSchema>

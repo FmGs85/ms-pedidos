@@ -36,6 +36,7 @@ model Pedido {
   itens           ItemPedido[]
   historicoStatus HistoricoStatus[]
   avaliacao       AvaliacaoPedido?
+  mensagens       MensagemPedido[]
 
   @@index([clienteId])
   @@index([status])
@@ -84,6 +85,20 @@ model AvaliacaoPedido {
   pedido Pedido @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
 
   @@map("avaliacoes_pedido")
+}
+
+model MensagemPedido {
+  id          String   @id @default(uuid())
+  pedidoId    String   @map("pedido_id")
+  remetenteId String   @map("remetente_id")
+  texto       String   @db.Text
+  lida        Boolean  @default(false)
+  criadoEm   DateTime @default(now()) @map("criado_em")
+
+  pedido Pedido @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
+
+  @@index([pedidoId])
+  @@map("mensagens_pedido")
 }
 
 enum StatusPedido {

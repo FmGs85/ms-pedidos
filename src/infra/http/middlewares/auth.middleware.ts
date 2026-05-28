@@ -2,9 +2,9 @@ import { FastifyRequest, FastifyReply } from 'fastify'
 import { UnauthorizedError, ForbiddenError } from '../../../domain/errors/app.error'
 
 export interface JwtPayload {
-  id: number | string  // campo gerado pelo ms-usuarios
+  id: number | string
   email: string
-  role: 'USER' | 'ADMIN'
+  role: 'USUARIO' | 'RESTAURANTE' | 'ADMIN'
   iat: number
   exp: number
 }
@@ -30,6 +30,18 @@ export async function apenasAdmin(
   const user = request.user as JwtPayload
   if (user.role !== 'ADMIN') {
     throw new ForbiddenError('Acesso restrito a administradores.')
+  }
+}
+
+// Middleware: verifica se é restaurante
+export async function apenasRestaurante(
+  request: FastifyRequest,
+  reply: FastifyReply,
+): Promise<void> {
+  await autenticar(request, reply)
+  const user = request.user as JwtPayload
+  if (user.role !== 'RESTAURANTE') {
+    throw new ForbiddenError('Acesso restrito a restaurantes.')
   }
 }
 

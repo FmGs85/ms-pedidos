@@ -3,6 +3,7 @@ import {
   ItemPedido,
   AvaliacaoPedido,
   HistoricoStatus,
+  MensagemPedido,
   StatusPedido,
   OrigemStatus,
 } from '../entities/pedido.entity'
@@ -34,4 +35,9 @@ export interface IPedidoRepository {
   buscarHistorico(pedidoId: string): Promise<HistoricoStatus[]>
   criarAvaliacao(avaliacao: Omit<AvaliacaoPedido, 'id' | 'criadoEm'>): Promise<AvaliacaoPedido>
   buscarAvaliacao(pedidoId: string): Promise<AvaliacaoPedido | null>
+
+  // Mensagens
+  criarMensagem(mensagem: Omit<MensagemPedido, 'id' | 'criadoEm'>): Promise<MensagemPedido>
+  listarMensagens(pedidoId: string): Promise<MensagemPedido[]>
+  marcarMensagensLidas(pedidoId: string): Promise<void>
 }
