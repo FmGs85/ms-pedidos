@@ -3,6 +3,7 @@ import { CriarPedidoUseCase } from '../../../application/use-cases/pedido/criar-
 import {
   BuscarPedidoUseCase,
   ListarPedidosUseCase,
+  ListarPedidosPorRestauranteUseCase,
   CancelarPedidoUseCase,
   AtualizarStatusPedidoUseCase,
   AplicarDescontoUseCase,
@@ -24,6 +25,7 @@ export class PedidoController {
     private readonly criarPedido: CriarPedidoUseCase,
     private readonly buscarPedido: BuscarPedidoUseCase,
     private readonly listarPedidos: ListarPedidosUseCase,
+    private readonly listarPedidosRestaurante: ListarPedidosPorRestauranteUseCase,
     private readonly cancelarPedido: CancelarPedidoUseCase,
     private readonly atualizarStatus: AtualizarStatusPedidoUseCase,
     private readonly aplicarDesconto: AplicarDescontoUseCase,
@@ -79,6 +81,21 @@ export class PedidoController {
     return reply.send({ success: true, ...resultado })
   }
 
+  // GET /pedidos/restaurante/:restauranteId
+  async listarPorRestaurante(request: FastifyRequest<{ Params: { restauranteId: string } }>, reply: FastifyReply) {
+    const restauranteId = request.params.restauranteId
+    const filtros = filtrosPedidoSchema.parse(request.query)
+    const resultado = await this.listarPedidosRestaurante.execute(restauranteId, {
+      status: filtros.status as StatusPedido | undefined,
+      dataInicio: filtros.dataInicio ? new Date(filtros.dataInicio) : undefined,
+      dataFim: filtros.dataFim ? new Date(filtros.dataFim) : undefined,
+      page: filtros.page,
+      limit: filtros.limit ?? 50,
+    })
+
+    return reply.send({ success: true, ...resultado })
+  }
+
   // DELETE /pedidos/:id
   async cancelar(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) {
     const user = getAuthUser(request)
@@ -102,6 +119,7 @@ export class PedidoController {
       pedidoId: request.params.id,
       novoStatus: body.status as StatusPedido,
       origem: body.origem as OrigemStatus,
+      entregadorId: body.entregador_id,
     })
 
     return reply.send({ success: true, data: pedido })

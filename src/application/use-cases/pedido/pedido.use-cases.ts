@@ -29,6 +29,15 @@ export class ListarPedidosUseCase {
   }
 }
 
+// ─── Listar Pedidos por Restaurante ──────────────────────────────────────────
+export class ListarPedidosPorRestauranteUseCase {
+  constructor(private readonly pedidoRepository: IPedidoRepository) {}
+
+  async execute(restauranteId: string, filtros: FiltrosPedido): Promise<PaginatedResult<Pedido>> {
+    return this.pedidoRepository.listarPorRestaurante(restauranteId, filtros)
+  }
+}
+
 // ─── Cancelar Pedido ──────────────────────────────────────────────────────────
 export class CancelarPedidoUseCase {
   constructor(private readonly pedidoRepository: IPedidoRepository) {}
@@ -68,6 +77,7 @@ export interface AtualizarStatusDTO {
   pedidoId: string
   novoStatus: StatusPedido
   origem: OrigemStatus
+  entregadorId?: string
 }
 
 export class AtualizarStatusPedidoUseCase {
@@ -87,6 +97,7 @@ export class AtualizarStatusPedidoUseCase {
 
     const atualizado = await this.pedidoRepository.atualizar(dto.pedidoId, {
       status: dto.novoStatus,
+      ...(dto.entregadorId ? { entregadorId: dto.entregadorId } : {}),
     })
 
     await this.pedidoRepository.registrarHistorico({

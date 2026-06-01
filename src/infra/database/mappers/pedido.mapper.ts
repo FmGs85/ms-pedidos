@@ -27,7 +27,7 @@ export interface PrismaPedidoRaw {
   itens: ItemPedido[]
 }
 
-export function toDomainPedido(raw: PrismaPedidoRaw): Pedido {
+export function toDomainPedido(raw: PrismaPedidoRaw & { avaliacao?: any }): Pedido {
   return {
     id: raw.id,
     clienteId: raw.clienteId,
@@ -36,6 +36,7 @@ export function toDomainPedido(raw: PrismaPedidoRaw): Pedido {
     pagamentoId: raw.pagamentoId ?? undefined,
     status: raw.status,
     itens: raw.itens,
+    avaliacao: raw.avaliacao ?? undefined,
     endereco: {
       rua: raw.enderecoRua,
       numero: raw.enderecoNumero,

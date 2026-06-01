@@ -15,16 +15,16 @@ export const criarPedidoSchema = z.object({
     )
     .min(1, 'O pedido deve ter ao menos um item.'),
   endereco: z.object({
-    rua: z.string().min(1, 'Rua é obrigatória.'),
-    numero: z.string().min(1, 'Número é obrigatório.'),
+    rua: z.string().default(''),
+    numero: z.string().default(''),
     complemento: z.string().max(80).optional(),
-    bairro: z.string().min(1, 'Bairro é obrigatório.'),
-    cidade: z.string().min(1, 'Cidade é obrigatória.'),
-    estado: z.string().length(2, 'Estado deve ter 2 caracteres (ex: RJ).'),
-    cep: z.string().regex(/^\d{5}-?\d{3}$/, 'CEP inválido. Use o formato 00000-000.'),
+    bairro: z.string().default(''),
+    cidade: z.string().default(''),
+    estado: z.string().max(2).default(''),
+    cep: z.string().default(''),
     latitude: z.number().optional(),
     longitude: z.number().optional(),
-  }),
+  }).default({}),
   formaPagamento: z.enum([
     'CARTAO_CREDITO',
     'CARTAO_DEBITO',
@@ -46,7 +46,8 @@ export const atualizarStatusSchema = z.object({
     'ENTREGUE',
     'CANCELADO',
   ]),
-  origem: z.enum(['CLIENTE', 'PAGAMENTOS', 'ENTREGADORES', 'SISTEMA']),
+  origem: z.enum(['CLIENTE', 'PAGAMENTOS', 'ENTREGADORES', 'SISTEMA']).default('SISTEMA'),
+  entregador_id: z.string().optional(),
 })
 
 // ─── Avaliação ────────────────────────────────────────────────────────────────

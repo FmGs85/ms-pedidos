@@ -12,6 +12,7 @@ import { CriarPedidoUseCase } from '../../application/use-cases/pedido/criar-ped
 import {
   BuscarPedidoUseCase,
   ListarPedidosUseCase,
+  ListarPedidosPorRestauranteUseCase,
   CancelarPedidoUseCase,
   AtualizarStatusPedidoUseCase,
   AplicarDescontoUseCase,
@@ -67,6 +68,7 @@ export async function buildApp(): Promise<FastifyInstance> {
     new CriarPedidoUseCase(repository),
     new BuscarPedidoUseCase(repository),
     new ListarPedidosUseCase(repository),
+    new ListarPedidosPorRestauranteUseCase(repository),
     new CancelarPedidoUseCase(repository),
     new AtualizarStatusPedidoUseCase(repository),
     new AplicarDescontoUseCase(repository),

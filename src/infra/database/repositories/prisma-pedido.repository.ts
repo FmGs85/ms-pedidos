@@ -90,6 +90,42 @@ export class PrismaPedidoRepository implements IPedidoRepository {
     }
   }
 
+  async listarPorRestaurante(
+    restauranteId: string,
+    filtros: FiltrosPedido,
+  ): Promise<PaginatedResult<Pedido>> {
+    const page = filtros.page ?? 1
+    const limit = filtros.limit ?? 50
+    const skip = (page - 1) * limit
+
+    const where: any = { restauranteId }
+    if (filtros.status) where.status = filtros.status
+    if (filtros.dataInicio || filtros.dataFim) {
+      where.criadoEm = {}
+      if (filtros.dataInicio) where.criadoEm.gte = filtros.dataInicio
+      if (filtros.dataFim) where.criadoEm.lte = filtros.dataFim
+    }
+
+    const [data, total] = await Promise.all([
+      this.prisma.pedido.findMany({
+        where,
+        include: { itens: true, avaliacao: true },
+        orderBy: { criadoEm: 'desc' },
+        skip,
+        take: limit,
+      }),
+      this.prisma.pedido.count({ where }),
+    ])
+
+    return {
+      data: data.map(p => toDomainPedido(p as any)),
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    }
+  }
+
   async atualizar(id: string, dados: Partial<Pedido>): Promise<Pedido> {
     const atualizado = await this.prisma.pedido.update({
       where: { id },

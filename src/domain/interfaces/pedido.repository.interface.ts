@@ -30,6 +30,7 @@ export interface IPedidoRepository {
   criar(pedido: Omit<Pedido, 'id' | 'criadoEm' | 'atualizadoEm'>): Promise<Pedido>
   buscarPorId(id: string): Promise<Pedido | null>
   listarPorCliente(clienteId: string, filtros: FiltrosPedido): Promise<PaginatedResult<Pedido>>
+  listarPorRestaurante(restauranteId: string, filtros: FiltrosPedido): Promise<PaginatedResult<Pedido>>
   atualizar(id: string, dados: Partial<Pedido>): Promise<Pedido>
   registrarHistorico(historico: Omit<HistoricoStatus, 'id' | 'registradoEm'>): Promise<void>
   buscarHistorico(pedidoId: string): Promise<HistoricoStatus[]>

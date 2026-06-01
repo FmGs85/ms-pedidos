@@ -45,6 +45,18 @@ export async function apenasRestaurante(
   }
 }
 
+// Middleware: verifica se é admin ou restaurante
+export async function apenasAdminOuRestaurante(
+  request: FastifyRequest,
+  reply: FastifyReply,
+): Promise<void> {
+  await autenticar(request, reply)
+  const user = request.user as JwtPayload
+  if (user.role !== 'ADMIN' && user.role !== 'RESTAURANTE') {
+    throw new ForbiddenError('Acesso restrito a restaurantes ou administradores.')
+  }
+}
+
 // Helper para pegar o usuário autenticado
 export function getAuthUser(request: FastifyRequest): JwtPayload {
   return request.user as JwtPayload

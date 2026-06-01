@@ -1,6 +1,6 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify'
 import { PedidoController } from '../controllers/pedido.controller'
-import { autenticar, apenasAdmin } from '../middlewares/auth.middleware'
+import { autenticar, apenasAdmin, apenasAdminOuRestaurante } from '../middlewares/auth.middleware'
 
 export async function pedidoRoutes(
   fastify: FastifyInstance,
@@ -15,16 +15,16 @@ export async function pedidoRoutes(
       security: [{ bearerAuth: [] }],
       body: {
         type: 'object',
-        required: ['restauranteId', 'itens', 'endereco', 'formaPagamento', 'taxaEntrega'],
+        required: ['restauranteId', 'itens', 'formaPagamento', 'taxaEntrega'],
         properties: {
-          restauranteId: { type: 'string', format: 'uuid' },
+          restauranteId: { type: 'string' },
           itens: {
             type: 'array',
             items: {
               type: 'object',
               required: ['produtoId', 'nomeProduto', 'quantidade', 'precoUnitario'],
               properties: {
-                produtoId: { type: 'string', format: 'uuid' },
+                produtoId: { type: 'string' },
                 nomeProduto: { type: 'string' },
                 quantidade: { type: 'integer', minimum: 1 },
                 precoUnitario: { type: 'integer', minimum: 1, description: 'Valor em centavos' },
@@ -34,15 +34,14 @@ export async function pedidoRoutes(
           },
           endereco: {
             type: 'object',
-            required: ['rua', 'numero', 'bairro', 'cidade', 'estado', 'cep'],
             properties: {
               rua: { type: 'string' },
               numero: { type: 'string' },
               complemento: { type: 'string' },
               bairro: { type: 'string' },
               cidade: { type: 'string' },
-              estado: { type: 'string', minLength: 2, maxLength: 2 },
-              cep: { type: 'string', pattern: '^\\d{5}-?\\d{3}$' },
+              estado: { type: 'string' },
+              cep: { type: 'string' },
               latitude: { type: 'number' },
               longitude: { type: 'number' },
             },
@@ -74,6 +73,16 @@ export async function pedidoRoutes(
     },
   }, (req: FastifyRequest, rep: FastifyReply) => controller.listar(req as any, rep))
 
+  fastify.get('/pedidos/restaurante/:restauranteId', {
+    preHandler: [apenasAdminOuRestaurante],
+    schema: {
+      tags: ['Pedidos'],
+      summary: 'Listar pedidos do restaurante',
+      security: [{ bearerAuth: [] }],
+      params: { type: 'object', properties: { restauranteId: { type: 'string' } } },
+    },
+  }, (req: FastifyRequest, rep: FastifyReply) => controller.listarPorRestaurante(req as any, rep))
+
   fastify.get('/pedidos/:id', {
     preHandler: [autenticar],
     schema: {
@@ -95,18 +104,19 @@ export async function pedidoRoutes(
   }, (req: FastifyRequest, rep: FastifyReply) => controller.cancelar(req as any, rep))
 
   fastify.patch('/pedidos/:id/status', {
-    preHandler: [apenasAdmin],
+    preHandler: [apenasAdminOuRestaurante],
     schema: {
       tags: ['Pedidos'],
-      summary: 'Atualizar status do pedido (admin/microsserviços)',
+      summary: 'Atualizar status do pedido (restaurante/admin)',
       security: [{ bearerAuth: [] }],
       params: { type: 'object', properties: { id: { type: 'string', format: 'uuid' } } },
       body: {
         type: 'object',
-        required: ['status', 'origem'],
+        required: ['status'],
         properties: {
           status: { type: 'string', enum: ['AGUARDANDO_CONFIRMACAO', 'CONFIRMADO', 'EM_PREPARO', 'EM_ENTREGA', 'ENTREGUE', 'CANCELADO'] },
           origem: { type: 'string', enum: ['CLIENTE', 'PAGAMENTOS', 'ENTREGADORES', 'SISTEMA'] },
+          entregador_id: { type: 'string' },
         },
       },
     },

@@ -70,6 +70,7 @@ export interface Pedido {
   pagamentoId?: string
   status: StatusPedido
   itens: ItemPedido[]
+  avaliacao?: AvaliacaoPedido
   endereco: Endereco
   formaPagamento: FormaPagamento
   subtotal: number
